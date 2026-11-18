@@ -1,0 +1,19 @@
+{
+    "schemaVersion": 1,
+    "generatedAt": 1794983006000,
+    "rules": [
+        {
+            "hubId": "amdm.ru/CHORDS",
+            "domain": "amdm.ru",
+            "mode": "CHORDS",
+            "name": "AmDm",
+            "version": 1,
+            "minAppVersionCode": 22,
+            "path": "rules/amdm.ru/CHORDS.json",
+            "sha256": "f329315ff9c1d8df93a3714101093b26f923b09ed1147172a42a2ac91cd1862f",
+            "language": [
+                "ru"
+            ]
+        }
+    ]
+}

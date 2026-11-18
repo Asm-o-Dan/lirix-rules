@@ -1,0 +1,74 @@
+name: validate
+
+# Checks every rule, the index and its signature. No secrets: the index is signed by the
+# owner on their own machine (see README), CI only checks.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      # On a pull request the tool comes from the base branch, so a PR cannot change the checker.
+      - name: Take the checker from the base branch
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          git worktree add --detach "$RUNNER_TEMP/base" "$BASE_SHA"
+          echo "TOOLS=$RUNNER_TEMP/base/tools" >> "$GITHUB_ENV"
+          echo "KEYS=$RUNNER_TEMP/base/keys/catalog-keys.txt" >> "$GITHUB_ENV"
+
+      - name: Use the checker of this commit
+        if: github.event_name != 'pull_request'
+        run: |
+          echo "TOOLS=$GITHUB_WORKSPACE/tools" >> "$GITHUB_ENV"
+          echo "KEYS=$GITHUB_WORKSPACE/keys/catalog-keys.txt" >> "$GITHUB_ENV"
+
+      - name: Checker integrity
+        run: cd "$TOOLS" && sha256sum -c lirix-rules-cli.jar.sha256
+
+      - name: Rules are valid
+        run: java -jar "$TOOLS/lirix-rules-cli.jar" validate .
+
+      - name: Contributors change only rules
+        if: github.event_name == 'pull_request' && github.event.pull_request.user.login != 'Asm-o-Dan'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          outside=$(git diff --name-only "$BASE_SHA" HEAD | grep -v '^rules/' || true)
+          if [ -n "$outside" ]; then
+            echo "Only files under rules/ may be changed in a contribution:"
+            echo "$outside"
+            exit 1
+          fi
+
+      - name: Changed rules raise their version
+        if: github.event_name == 'pull_request'
+        run: java -jar "$TOOLS/lirix-rules-cli.jar" versions "$RUNNER_TEMP/base" .
+
+      # A contribution leaves the index alone; the owner re-indexes and signs after merging.
+      - name: Index matches the rules and is signed
+        if: github.event_name != 'pull_request' || github.event.pull_request.user.login == 'Asm-o-Dan'
+        run: |
+          java -jar "$TOOLS/lirix-rules-cli.jar" check-index .
+          java -jar "$TOOLS/lirix-rules-cli.jar" verify . "$KEYS"

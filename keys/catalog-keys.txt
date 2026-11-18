@@ -1,0 +1,5 @@
+# Lirix rules catalogue: public keys that may sign index.json (base64 SPKI, P-256).
+# primary
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEGk4CTBBUsBfQBVGVoztXoOAH+DseihI64XyGCuddJVHFgTTvaVC5oJcYLe2etMMSUA7UkEyh5AqnxGl7v9jpgQ==
+# backup (offline, for rotation)
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEdqV6e218UitIRTjzbTsUOgd0c833OKMBsi6JnGkqD8yLOMbXox4Sn4x/ZTuRDyUMylSf+n9oiqiqhtB02Klong==

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 2,
+  "mode": "CHORDS",
+  "name": "AmDm",
+  "domain": "amdm.ru",
+  "contentSelector": "pre[itemprop=chordsBlock]",
+  "stripSelectors": [],
+  "searchUrlTemplate": "https://amdm.ru/search/?q={query}",
+  "searchResultSelector": "table.items td.artist_name > a + a:not([href*=peredelannye_pesni])",
+  "version": 1,
+  "language": [
+    "ru"
+  ],
+  "checks": [
+    {
+      "artist": "Сплин",
+      "title": "Романс"
+    },
+    {
+      "artist": "ДДТ",
+      "title": "Что такое осень"
+    }
+  ]
+}
